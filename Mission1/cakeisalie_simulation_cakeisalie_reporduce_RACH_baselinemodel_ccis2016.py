@@ -4,6 +4,7 @@ from typing import NamedTuple
 import time
 import matplotlib.pyplot as plt
 from pathlib import Path
+import math
 
 class RACH_simulation_Result(NamedTuple):
     success_probability: float
@@ -93,6 +94,14 @@ def P_omega(p: float,
             ) -> float:
 
     return 1.0 - (p + (1.0 - p) * g ** (M + 1)) ** (N + 1)
+
+def p_from_gamma(gamma: float, 
+                 preambles: int = 54, 
+                 opps_per_s: 
+                 int = 200
+                 ) -> float:
+
+    return 1.0 - math.exp(-gamma / (preambles * opps_per_s))
 
 
 def D_closed(p: float, g: float, N: int = 9, M: int = 4,
