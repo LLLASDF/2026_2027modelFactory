@@ -4,7 +4,7 @@
 - **Com_statue**:  combined  
 - **Author**:  Cakeisalie(LLLASDF)  
   
-## Massion-1 information  
+## Mission-1 information  
 - **code_file name**: cakeisalie_reproduce_baseline_ccis2016.py  
 - **model name**: cakeisalie_reporduce_RACH_baselinemodel  
 - **code environment**: python  
