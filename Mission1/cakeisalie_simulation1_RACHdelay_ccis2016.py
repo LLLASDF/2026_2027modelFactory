@@ -2,6 +2,7 @@ from numpy.random import Generator, default_rng
 import numpy
 from collections.abc import Sequence
 from typing import NamedTuple
+import time
 
 class RACH_Result(NamedTuple):
     success: bool
@@ -99,14 +100,15 @@ def main() -> None:
     g1 = 0.02
     N = 9
     M = 4
-    repeating_times = 10000
+    repeating_times = 100000
 
     Sequ_results = [simulation1_in_RACH(p, g1, N, M) for _ in range(repeating_times)]
     k_greater0_ratio = sum(1 for r in Sequ_results if r.k > 0) / len(Sequ_results)
     Tup_result = simulation_RACH_delay(Sequ_results, M, 10.5, 20.0, 5.0, 6.0)
 
-    print(f"at the N = {N+1} M = {M+1} and repeat in {repeating_times }\nthe simulation of RACH succeeded probabiliy result: {Tup_result[0]*100:.4f}%\nthe simulation of the delay is: {Tup_result[1]*100:.2f}ms\nand the ratio of k (k>0): {k_greater0_ratio*100:.2f}%")
-
+    print(f"at the N = {N+1} M = {M+1} and repeat in {repeating_times }\nthe simulation of RACH succeeded probabiliy result: {Tup_result[0]*100:.4f}%\nthe simulation of the delay is: {Tup_result[1]:.2f}ms\nand the ratio of k (k>0): {k_greater0_ratio*100:.2f}%")
+    print(time)
+    
 #main() 保护
 if  __name__ == "__main__":
     main()
