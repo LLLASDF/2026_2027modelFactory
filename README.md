@@ -9,9 +9,9 @@
 - **model name**: cakeisalie_reporduce_RACH_baselinemodel  
 - **code environment**: python
 
-- 2026_2027modelFactory/
-├── README.md
-└── Mission1/
+- 2026_2027modelFactory/  
+├── README.md  
+└── Mission1/  
     ├── cakeisalie_reproduce_baseline_ccis2016.py  
     ├── cakeisalie_reproducibility_ccis2016.py  
     ├── cakeisalie_simulation_cakeisalie_reporduce_RACH_baselinemodel_ccis2016.py  
