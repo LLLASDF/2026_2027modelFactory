@@ -116,6 +116,9 @@ def D_closed(p: float, g: float, N: int = 9, M: int = 4,
     t4 = (d1 + d3 + d4) * (1.0 - C ** (N + 1))
     return (t1 + t2 + t3 + t4) / P_omega(p, g)
 
+def mc_sigma(p: float, n: int) -> float:
+    """蒙特卡洛成功率估计的理论标准差: sigma = sqrt(p(1-p)/n)"""
+    return (p * (1.0 - p) / n) ** 0.5
 
 # main() 保护
 def main() -> None:
@@ -126,6 +129,7 @@ def main() -> None:
     d1, d2, d3, d4 = 10.5, 20.0, 5.0, 6.0
     PS = [0.1, 0.3, 0.5, 0.7, 0.9]
     GS = [0.02, 0.5, 0.8, 0.95]
+    # 扫描循环内, 每个网格点:
 
     #verification grid sweep
     theory = numpy.zeros((len(GS), len(PS)))
@@ -133,6 +137,7 @@ def main() -> None:
     theory_d = numpy.zeros((len(GS), len(PS)))
     sim_d = numpy.zeros_like(theory_d)
     t0 = time.time()
+    
     for i, g in enumerate(GS):
         for j, p in enumerate(PS):
             theory[i, j] = P_omega(p, g)
@@ -141,9 +146,12 @@ def main() -> None:
                 p, g, N, M, number_devices, d1, d2, d3, d4)
             sim[i, j] = result.success_probability
             sim_d[i, j] = result.delay
+            sigma = mc_sigma(theory[i, j], number_devices)
+            ok = "sigma Accepet" if abs(theory[i, j] - sim[i, j]) <= 3 * sigma else "sigma Alert"
             print(f"p={p}, g={g}: P theory={theory[i,j]:.4f} MC={sim[i,j]:.4f} "
                   f"|dP|={abs(theory[i,j]-sim[i,j]):.5f} | "
-                  f"D theory={theory_d[i,j]:.1f} MC={sim_d[i,j]:.1f} ms")
+                  f"D theory={theory_d[i,j]:.1f} MC={sim_d[i,j]:.1f} ms"
+                  f"|dP|={abs(theory[i,j]-sim[i,j]):.5f} 3σ={3*sigma:.5f} {ok}")
     print(f"grid sweep finished in {time.time() - t0:.1f}s")
 
     #draw curve plot
