@@ -112,7 +112,7 @@ def D_closed(p: float, g: float, N: int = 9, M: int = 4,
     f = 1.0 - (N + 1) * C ** N + N * C ** (N + 1)
     t1 = (d1 + d2) * C / ((1.0 - p) * (1.0 - g ** (M + 1))) * f
     t2 = d4 * (1.0 - (M + 1) * g ** M + M * g ** (M + 1)) / (1.0 - g) * (g * (1.0 - C ** (N + 1)) / (1.0 - g ** (M + 1)))
-    t3 = (d3 + M * d4 - d2) * (g ** (M + 1) / (1.0 - g ** (M + 1))) * f
+    t3 = (d3 + (M+1) * d4 - d2) * (g ** (M + 1) / (1.0 - g ** (M + 1))) * f
     t4 = (d1 + d3 + d4) * (1.0 - C ** (N + 1))
     return (t1 + t2 + t3 + t4) / P_omega(p, g)
 
@@ -137,7 +137,12 @@ def main() -> None:
     theory_d = numpy.zeros((len(GS), len(PS)))
     sim_d = numpy.zeros_like(theory_d)
     t0 = time.time()
-    
+
+    p_dense = numpy.linspace(0.0, 0.999, 350)
+    theory_dense = numpy.array([[P_omega(pi, g) for pi in p_dense] for g in GS])
+    theory_d_dense = numpy.array([[D_closed(pi, g, N, M, d1, d2, d3, d4)
+                                   for pi in p_dense] for g in GS])
+
     for i, g in enumerate(GS):
         for j, p in enumerate(PS):
             theory[i, j] = P_omega(p, g)
@@ -149,9 +154,9 @@ def main() -> None:
             sigma = mc_sigma(theory[i, j], number_devices)
             ok = "sigma Accepet" if abs(theory[i, j] - sim[i, j]) <= 3 * sigma else "sigma Alert"
             print(f"p={p}, g={g}: P theory={theory[i,j]:.4f} MC={sim[i,j]:.4f} "
-                  f"|dP|={abs(theory[i,j]-sim[i,j]):.5f} | "
+                  f"|dD|={abs(theory[i,j]-sim[i,j]):.2f} | "
                   f"D theory={theory_d[i,j]:.1f} MC={sim_d[i,j]:.1f} ms"
-                  f"|dP|={abs(theory[i,j]-sim[i,j]):.5f} 3σ={3*sigma:.5f} {ok}")
+                  f"|dP|={abs(theory[i,j]-sim[i,j]):.4f} 3σ={3*sigma:.5f} {ok}")
     print(f"grid sweep finished in {time.time() - t0:.1f}s")
 
     #draw curve plot
@@ -161,12 +166,13 @@ def main() -> None:
 
     fig, ax = plt.subplots(figsize=(7.5, 5))
     for i, g in enumerate(GS):
-        ax.plot(PS, theory[i], "-", lw=1.6, label=f"g = {g} (closed form)")
+        #ax.plot(PS, theory[i], "-", lw=1.6, label=f"g = {g} (closed form)")
+        ax.plot(p_dense, theory_dense[i], "-", lw=1.6, label=f"g = {g} (closed form)")
         ax.plot(PS, sim[i], "o", ms=5, label=f"g = {g} (Monte Carlo)")
 
     ax.set_xlabel("Collision probability p")
     ax.set_ylabel("Access success probability P(ω)")
-    ax.set_title(f"Closed form vs Monte Carlo (N={N+1}, M={M+1}, "
+    ax.set_title(f"Closed form vs Monte Carlo (N={N}, M={M}, "
                  f"n_dev={number_devices:,})")
     
     ax.grid(alpha=0.3)
@@ -178,12 +184,13 @@ def main() -> None:
     #average access delay curves (Fig. 5 style)
     fig, ax = plt.subplots(figsize=(7.5, 5))
     for i, g in enumerate(GS):
-        ax.plot(PS, theory_d[i], "-", lw=1.6, label=f"g = {g} (closed form)")
+        #ax.plot(PS, theory_d[i], "-", lw=1.6, label=f"g = {g} (closed form)")
+        ax.plot(p_dense, theory_d_dense[i], "-", lw=1.6, label=f"g = {g} (closed form)")
         ax.plot(PS, sim_d[i], "s", ms=5, label=f"g = {g} (Monte Carlo)")
     ax.set_xlabel("Collision probability p")
     ax.set_ylabel("Average access delay D, ms")
     ax.set_title(f"Average access delay: closed form vs Monte Carlo "
-                 f"(N={N+1}, M={M+1}, n_dev={number_devices:,})")
+                 f"(N={N}, M={M}, n_dev={number_devices:,})")
     ax.grid(alpha=0.3)
     ax.legend(fontsize=8, ncol=2)
     fig.tight_layout()
@@ -195,4 +202,3 @@ def main() -> None:
 # main() 保护
 if __name__ == "__main__":
     main()
-
